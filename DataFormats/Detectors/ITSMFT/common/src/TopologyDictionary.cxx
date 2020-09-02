@@ -17,6 +17,7 @@
 #include "DataFormatsITSMFT/ClusterTopology.h"
 #include <iostream>
 #include "ITSMFTBase/SegmentationAlpide.h"
+#include "TFile.h"
 
 using std::cout;
 using std::endl;
@@ -35,7 +36,7 @@ TopologyDictionary::TopologyDictionary() : mSmallTopologiesLUT{-1} {}
 
 TopologyDictionary::TopologyDictionary(std::string fileName)
 {
-  readBinaryFile(fileName);
+  read(fileName);
 }
 
 std::ostream& operator<<(std::ostream& os, const TopologyDictionary& dict)
@@ -106,6 +107,29 @@ int TopologyDictionary::readBinaryFile(string fname)
     }
   }
   in.close();
+  return 0;
+}
+
+int TopologyDictionary::read(string fname)
+{
+  TFile input_file(fname.c_str());
+  if (!input_file.IsOpen()) {
+    LOG(ERROR) << "The file " << fname << " coud not be opened";
+    throw std::runtime_error("The file coud not be opened");
+  } else {
+    TopologyDictionary* dict_tmp = nullptr;
+    input_file.GetObject("TopologyDictionary", dict_tmp);
+    if(!dict_tmp){
+      LOG(ERROR) << "The file contains no dictionary";
+      throw std::runtime_error("The file contains no dictionary");
+    } else{
+      this->mCommonMap = dict_tmp->mCommonMap;
+      this->mGroupMap = dict_tmp->mGroupMap;
+      this->mVectorOfIDs = dict_tmp->mVectorOfIDs;
+      memcpy(this->mSmallTopologiesLUT, dict_tmp->mSmallTopologiesLUT, sizeof(int) * (255 * 8 + 1));
+    }
+  }
+  input_file.Close();
   return 0;
 }
 

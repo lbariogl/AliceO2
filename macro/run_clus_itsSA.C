@@ -26,8 +26,7 @@ void run_clus_itsSA(std::string inputfile = "rawits.bin", // input file name
                     std::string outputfile = "clr.root",  // output file name (root or raw)
                     bool raw = true,                      // flag if this is raw data
                     int strobeBC = -1,                    // strobe length in BC for masking, if <0, get automatically (assume cont. readout)
-                    std::string dictionaryfile = "",
-                    bool withPatterns = true)
+                    std::string dictionaryfile = "")
 {
   // Initialize logger
   FairLogger* logger = FairLogger::GetLogger();
@@ -42,7 +41,7 @@ void run_clus_itsSA(std::string inputfile = "rawits.bin", // input file name
   clus->setMaxROframe(2 << 21); // about 3 cluster files per a raw data chunk
 
   if (dictionaryfile.empty()) {
-    dictionaryfile = o2::base::NameConf::getDictionaryFileName(o2::detectors::DetID::ITS, "", ".bin");
+    dictionaryfile = o2::base::NameConf::getDictionaryFileName(o2::detectors::DetID::ITS, "", ".root");
   }
   std::ifstream file(dictionaryfile.c_str());
   if (file.good()) {

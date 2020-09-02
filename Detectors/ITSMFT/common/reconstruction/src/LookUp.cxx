@@ -33,7 +33,7 @@ LookUp::LookUp(std::string fileName)
 
 void LookUp::loadDictionary(std::string fileName)
 {
-  mDictionary.readBinaryFile(fileName);
+  mDictionary.read(fileName);
   mTopologiesOverThreshold = mDictionary.mCommonMap.size();
 }
 

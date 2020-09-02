@@ -24,10 +24,10 @@ void compareTopologyDistributions(
   string output_file_name = "comparison.root")
 {
   if (dictionary_file_name.empty()) {
-    dictionary_file_name = o2::base::NameConf::getDictionaryFileName(o2::detectors::DetID::ITS, "", ".bin");
+    dictionary_file_name = o2::base::NameConf::getDictionaryFileName(o2::detectors::DetID::ITS, "", ".root");
   }
   o2::itsmft::TopologyDictionary dict;
-  dict.readBinaryFile(dictionary_file_name.c_str());
+  dict.read(dictionary_file_name.c_str());
   int dict_size = dict.getSize();
   TH1F* hDictio = nullptr;
   o2::itsmft::TopologyDictionary::getTopologyDistribution(dict, hDictio, "hComplete");
