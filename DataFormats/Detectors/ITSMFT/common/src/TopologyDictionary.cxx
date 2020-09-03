@@ -38,11 +38,20 @@ TopologyDictionary::TopologyDictionary(std::string fileName)
   readBinaryFile(fileName);
 }
 
+std::ostream& TopologyDictionary::printEntry(int n, std::ostream& os) const{
+   assert(n >= 0 || n < (int)mVectorOfIDs.size());
+   os << "ID: " << n << " Hash: " << mVectorOfIDs[n].mHash << " ErrX: " << mVectorOfIDs[n].mErrX << " ErrZ : " << mVectorOfIDs[n].mErrZ << " xCOG: " <<  mVectorOfIDs[n].mXCOG << " zCOG: " << mVectorOfIDs[n].mZCOG << " Npixels: " << mVectorOfIDs[n].mNpixels << " Frequency: " << mVectorOfIDs[n].mFrequency << " isGroup : " << std::boolalpha << mVectorOfIDs[n].mIsGroup << std::endl
+       << mVectorOfIDs[n].mPattern << std::endl
+       << "*********************************************************" << std::endl
+       << std::endl;
+  return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const TopologyDictionary& dict)
 {
   int ID = 0;
   for (auto& p : dict.mVectorOfIDs) {
-    os << "ID: " << ID++ << " Hash: " << p.mHash << " ErrX: " << p.mErrX << " ErrZ : " << p.mErrZ << " xCOG: " << p.mXCOG << " zCOG: " << p.mZCOG << " Npixles: " << p.mNpixels << " Frequency: " << p.mFrequency << " isGroup : " << std::boolalpha << p.mIsGroup << std::endl
+    os << "ID: " << ID++ << " Hash: " << p.mHash << " ErrX: " << p.mErrX << " ErrZ : " << p.mErrZ << " xCOG: " << p.mXCOG << " zCOG: " << p.mZCOG << " Npixels: " << p.mNpixels << " Frequency: " << p.mFrequency << " isGroup : " << std::boolalpha << p.mIsGroup << std::endl
        << p.mPattern << std::endl
        << "*********************************************************" << std::endl
        << std::endl;

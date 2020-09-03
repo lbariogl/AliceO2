@@ -84,6 +84,8 @@ class TopologyDictionary
   void writeBinaryFile(std::string outputFile);
   /// Reads the dictionary from a binary file
   int readBinaryFile(std::string fileName);
+  /// Prints the n_th entry of the dictionary
+  std::ostream& printEntry(int n, std::ostream& os = std::cout) const;
   /// Returns the x position of the COG for the n_th element
   inline float getXCOG(int n) const
   {
