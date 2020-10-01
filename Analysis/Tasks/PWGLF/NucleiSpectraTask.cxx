@@ -10,11 +10,19 @@
 #include "Framework/runDataProcessing.h"
 #include "Framework/AnalysisTask.h"
 #include "Framework/AnalysisDataModel.h"
+#include "CommonConstants/PhysicsConstants.h"
+
+#include "Analysis/TriggerAliases.h"
+#include "Analysis/EventSelection.h"
+#include "Analysis/Multiplicity.h"
+#include "Analysis/Centrality.h"
+#include "Analysis/TrackSelectionTables.h"
 
 #include "PID/PIDResponse.h"
 
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TLorentzVector.h>
 
 using namespace o2;
 using namespace o2::framework;
@@ -23,39 +31,25 @@ using namespace o2::framework::expressions;
 struct NucleiSpecraTask {
 
   OutputObj<TH2F> hTPCsignal{TH2F("hTPCsignal", ";#it{p} (GeV/#it{c}); d#it{E} / d#it{X} (a. u.)", 600, 0., 3, 1400, 0, 1400)};
-  OutputObj<TH1F> hMomentum{TH1F("hMomentum", ";#it{p} (GeV/#it{c});", 600, 0., 3.)};
+  OutputObj<TH1F> hMultiplicity{TH1F("hMultiplicity", ";V0M (%);", 101, -0.5, 100.5)};
 
-  Configurable<float> absEtaMax{"absEtaMax", 0.8, "pseudo-rapidity edges"};
-  Configurable<float> absYmax{"absYmax", 0.5, "rapidity edges"};
-  Configurable<float> beamRapidity{"yBeam", 0., "beam rapidity"};
-  Configurable<float> chi2TPCperNDF{"chi2TPCperNDF", 4., "chi2 per NDF in TPC"};
-  Configurable<float> foundFractionTPC{"foundFractionTPC", 0., "TPC clusters / TPC crossed rows"};
-  Configurable<int> recPointsTPC{"recPointsTPC", 0, "clusters in TPC"};
-  Configurable<int> signalClustersTPC{"signalClustersTPC", 70, "clusters with PID in TPC"};
-  Configurable<float> minEnergyLoss{"minEnergyLoss", 0., "energy loss in TPC"};
-  Configurable<int> recPointsITS{"recPointsITS", 2, "number of ITS points"};
-  Configurable<int> recPointsITSInnerBarrel{"recPointsITSInnerBarrel", 1, "number of points in ITS Inner Barrel"};
+  FiltertrackFilter = aod::track::isGlobalTrack == true; 
 
-  Filter etaFilter = aod::track::eta > -1 * absEtaMax&& aod::track::eta < absEtaMax;
-  Filter chi2Filter = aod::track::tpcChi2NCl < chi2TPCperNDF;
+  void process(soa::Join<aod::Collisions, aod::EvSels, aod::Cents>::iterator const& col, soa::Filtered<soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::pidRespTPC>>::iterator const& track)
+  { 
+    if (!col.alias()[kINT7])
+      return;
+    if (!col.sel7())
+      return;
 
-  void process(soa::Filtered<soa::Join<aod::Tracks, aod::TracksExtra>> const& tracks)
-  {
-    for (auto& track : tracks) {
-      // Part not covered by filters
-      if (track.tpcNClsFound() < recPointsTPC) {
-        continue;
-      }
-      if (track.itsNCls() < recPointsITS) {
-        continue;
-      }
-      if (track.itsNClsInnerBarrel() < recPointsITSInnerBarrel) {
-        continue;
-      }
+    hMultiplicity->Fill(col.centV0M());
+    
+    TLorentzVector cutVector{};
+    cutVector.SetPtEtaPhiM(track.pt(), track.eta(), track.phi(), constants::physics::MassDeuteron);
+    if (cutVector.Rapidity() < yMin + beamRapidity || cutVector.Rapidity() > yMax + beamRapidity)
+      continue;
 
-      hTPCsignal->Fill(track.p(), track.tpcSignal());
-      hMomentum->Fill(track.p());
-    }
+    hTPCsignal->Fill(track.p(), track.tpcSignal());
   }
 };
 
